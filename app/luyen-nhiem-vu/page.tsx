@@ -15,10 +15,8 @@ export default async function MissionPage(){
   `;
   return <AppShell user={user} admin={user.role==="admin"}>
     <MissionSetup/>
-    <section className="card card-pad section">
-      <div className="section-head"><div><h2 className="h2">Siêu khó</h2><div className="muted" style={{fontSize:12}}>Vận dụng cao · 5 câu</div></div><span className="badge badge-gold">+8 vàng / câu đúng</span></div>
-      <div className="muted" style={{fontSize:13}}>Mỗi câu đúng: TN 8 · Đ/S 15 · TLN 20 EXP. Cả lượt: 40–100 EXP · tối đa 40 vàng.</div>
-      <div style={{marginTop:8,fontSize:13,fontWeight:800}}>Câu Vận dụng cao hôm nay: {Number(today?.n??0)}/30 đủ thưởng</div>
+    <section className="section">
+      <div className="muted" style={{fontSize:12}}>Kho demo đã seed · 35 câu mẫu để kiểm thử luồng. Bộ lớn hơn sẽ import qua Admin.</div>
     </section>
   </AppShell>;
 }

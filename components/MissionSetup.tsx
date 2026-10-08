@@ -1,68 +1,191 @@
- "use client";
+"use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CHAPTERS, DIFFICULTIES } from "@/lib/config";
 
-const cfg:any={
-  basic:{label:"Cơ bản",desc:"Làm quen kiến thức",points:"Thiết lập lại theo config",gold:4},
-  medium:{label:"Trung bình",desc:"Phân tích và liên kết",points:"Thiết lập lại theo config",gold:6},
-  high_application:{label:"Siêu khó",desc:"Vận dụng cao · 5 câu",points:"TN 8 · Đ/S 15 · TLN 20 EXP",gold:8}
-};
+const configs = [
+  DIFFICULTIES.basic,
+  DIFFICULTIES.medium,
+  DIFFICULTIES.hard,
+  DIFFICULTIES.high_application,
+] as const;
 
-export default function MissionSetup(){
-  const [chapter,setChapter]=useState("c12-1");
-  const [difficulty,setDifficulty]=useState("high_application");
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState("");
-  const router=useRouter();
+export default function MissionSetup() {
+  const [chapter, setChapter] = useState("c12-1");
+  const [difficulty, setDifficulty] = useState("high_application");
+  const [mode, setMode] = useState<"normal" | "quiz">("normal");
+  const [savedTab, setSavedTab] = useState<"review" | "saved">("review");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-  async function start(){
-    setLoading(true); setError("");
-    try{
-      const res=await fetch("/api/missions/start",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({chapter,difficulty})});
-      const data=await res.json();
-      if(!res.ok) throw new Error(data.error||"Không bắt đầu được");
+  const selected = useMemo(
+    () => configs.find((x) => x.key === difficulty) ?? configs[3],
+    [difficulty]
+  );
+
+  async function start() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/missions/start", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ chapter, difficulty, quiz: mode === "quiz" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Không bắt đầu được");
       router.push(`/luyen-nhiem-vu/${data.run.id}`);
-    }catch(e){setError(e instanceof Error?e.message:"Không bắt đầu được");}
-    finally{setLoading(false);}
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không bắt đầu được");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  return <>
-    <div className="card card-pad">
-      <div className="kicker">Luyện nhiệm vụ</div>
-      <h1 className="h1" style={{marginTop:5}}>Chọn mức độ</h1>
-      <p className="muted" style={{margin:"6px 0 16px"}}>5 câu mỗi lượt. Correct answer chỉ được chấm ở server khi nộp.</p>
-      <div className="pill-tabs">
-        <button className={`pill${chapter==="c12-1"?" active":""}`} onClick={()=>setChapter("c12-1")}>Chương 1 · Ester – Lipid</button>
-        <button className={`pill${chapter==="c12-2"?" active":""}`} onClick={()=>setChapter("c12-2")}>Chương 2 · Carbohydrate</button>
-      </div>
-    </div>
+  return (
+    <>
+      <section className="mission-head-card">
+        <div className="mission-head-top">
+          <div>
+            <div className="kicker">Kiểu làm</div>
+            <div className="mode-tabs" role="tablist" aria-label="Kiểu làm">
+              <button
+                className={`mode-tab${mode === "normal" ? " active" : ""}`}
+                onClick={() => setMode("normal")}
+                type="button"
+              >
+                Thường
+              </button>
+              <button
+                className={`mode-tab${mode === "quiz" ? " active" : ""}`}
+                onClick={() => setMode("quiz")}
+                type="button"
+              >
+                Quiz
+              </button>
+            </div>
+          </div>
+          <div className="mission-stats">
+            Tăng câu, thiết lập ôn lại · giải nhanh · thời gian
+          </div>
+        </div>
 
-    <div className="difficulty-grid section">
-      {Object.entries(cfg).map(([key,c]:any)=>(
-        <button key={key} className={`difficulty-card${key==="high_application"?" high":""}`} onClick={()=>setDifficulty(key)} style={{textAlign:"left",outline:difficulty===key?"2px solid color-mix(in srgb,var(--accent) 55%,transparent)":"none"}}>
+        <div className="section-head mission-save-head">
           <div>
-            <div className="difficulty-tag">{c.label}</div>
-            <div className="h2" style={{marginTop:6}}>{c.desc}</div>
-            <div className="muted" style={{fontSize:12,marginTop:6}}>{key==="high_application"?"5 câu / lượt · tối đa 30 câu đủ thưởng/ngày":"5 câu / lượt · reward config của rebuild"}</div>
-          </div>
-          <div>
-            <div className="rewards">
-              <span className="badge badge-blue">{c.points}</span>
-              <span className="badge badge-gold">+{c.gold} vàng / câu đúng</span>
-            </div>
-            <div style={{marginTop:12,fontSize:12,fontWeight:800,color:difficulty===key?"var(--blue-700)":"var(--muted)"}}>
-              {difficulty===key?"✓ Đang chọn":"Chọn mức này"}
+            <h2 className="h2">Câu đã lưu</h2>
+            <div className="muted" style={{ fontSize: 12 }}>
+              Tăng câu, thiết lập ôn lại và giải nhanh
             </div>
           </div>
+          <div className="pill-tabs">
+            <button
+              className={`pill${savedTab === "review" ? " active" : ""}`}
+              type="button"
+              onClick={() => setSavedTab("review")}
+            >
+              Ôn câu đã lưu
+            </button>
+            <button
+              className={`pill${savedTab === "saved" ? " active" : ""}`}
+              type="button"
+              onClick={() => setSavedTab("saved")}
+            >
+              Câu đã lưu (0)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="mission-step card card-pad section">
+        <div className="step-title">Bước 1 · Chọn chương</div>
+
+        <div className="chapter-picker chapter-picker-large">
+          {CHAPTERS.map((c) => (
+            <button
+              key={c.key}
+              type="button"
+              disabled={!c.enabled}
+              className={`chapter-option${chapter === c.key ? " selected" : ""}${!c.enabled ? " disabled" : ""}`}
+              onClick={() => c.enabled && setChapter(c.key)}
+            >
+              <span className="chapter-main">{c.label}</span>
+              <span className="chapter-sub">
+                {c.enabled
+                  ? "Kho demo · chọn để luyện"
+                  : "Chưa có trong kho demo"}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mission-note" style={{ marginTop: 10 }}>
+          Bản rebuild đã có dữ liệu kiểm thử cho Chương 1 và Chương 2.
+          Các chương còn lại hiển thị để bám cấu trúc web gốc và sẽ bật khi import kho câu hỏi.
+        </div>
+      </section>
+
+      <section className="mission-step card card-pad section">
+        <div className="step-title">Bước 2 · Chọn độ khó</div>
+
+        <div className="difficulty-grid mission-difficulty-grid">
+          {configs.map((c) => {
+            const stars = "★".repeat(c.stars) + "☆".repeat(4 - c.stars);
+
+            return (
+              <button
+                key={c.key}
+                type="button"
+                className={`difficulty-card mission-card${c.key === "high_application" ? " high" : ""}${difficulty === c.key ? " selected" : ""}`}
+                onClick={() => setDifficulty(c.key)}
+              >
+                <div>
+                  <div className="difficulty-stars">{stars}</div>
+                  <div className="mission-card-title">{c.label}</div>
+                  <div className="mission-card-subtitle">
+                    {c.level} · {c.total} câu
+                  </div>
+                  <div className="mission-card-rewards">
+                    <b>Mỗi câu đúng:</b> TN {c.points.single} · Đ/S {c.points.true_false} ·
+                    {" "}TLN {c.points.short_answer} EXP · {c.goldPerCorrect} vàng
+                  </div>
+                  <div className="mission-card-range">
+                    Cả lượt: {c.runExpMin}–{c.runExpMax} EXP · {c.runGold} vàng
+                  </div>
+                </div>
+                <div className="mission-cap">
+                  {c.dailyLabel}: 0/{c.dailyCap} đủ thưởng
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mission-note">
+          Câu gặp lại ngày sau còn 50%. Lượt đúng dưới 50% hoặc làm quá nhanh
+          (mỗi câu 5–25 giây, câu Đúng/Sai 30 giây) thì không thưởng.
+        </div>
+      </section>
+
+      {error && (
+        <div className="badge badge-red section" role="alert">
+          {error}
+        </div>
+      )}
+
+      <div className="mission-start-bar">
+        <button
+          className="mission-start-btn"
+          type="button"
+          onClick={start}
+          disabled={loading}
+        >
+          {loading
+            ? "Đang tạo lượt…"
+            : `Bắt đầu · ${selected.label} · ${selected.total} câu`}
         </button>
-      ))}
-    </div>
-
-    {error && <div className="badge badge-red section">{error}</div>}
-    <div className="section toolbar">
-      <button className="btn btn-primary" onClick={start} disabled={loading}>{loading?"Đang tạo lượt…":"Bắt đầu nhiệm vụ"}</button>
-      <span className="muted" style={{fontSize:12}}>Chapter: {chapter}</span>
-    </div>
-  </>;
+      </div>
+    </>
+  );
 }

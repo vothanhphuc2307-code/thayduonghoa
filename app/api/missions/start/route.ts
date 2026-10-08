@@ -14,7 +14,7 @@ export async function POST(request: NextRequest){
     const body=await request.json();
     const chapter=typeof body.chapter==="string" ? body.chapter.trim() : "c12-1";
     const difficulty=body.difficulty as DifficultyKey;
-    if(!(difficulty in {basic:1,medium:1,high_application:1})) return json({error:"Difficulty không hợp lệ"},{status:400});
+    if(!(difficulty in {basic:1,medium:1,hard:1,high_application:1})) return json({error:"Difficulty không hợp lệ"},{status:400});
     const cfg=difficultyConfig(difficulty);
     const db=requireDb();
 
@@ -31,13 +31,24 @@ export async function POST(request: NextRequest){
       if(used>=cfg.dailyCap) return json({error:`Đã đủ ${cfg.dailyCap} câu thưởng hôm nay.`},{status:429});
     }
 
-    const rows=await db`
+    let rows=await db`
       SELECT id,type,chapter,difficulty,title,prompt,options,true_false_items
       FROM questions
       WHERE published=true AND difficulty=${difficulty} AND chapter=${chapter}
       ORDER BY RANDOM()
       LIMIT ${cfg.total}
     `;
+
+    if(rows.length<cfg.total && difficulty==="hard") {
+      rows=await db`
+        SELECT id,type,chapter,difficulty,title,prompt,options,true_false_items
+        FROM questions
+        WHERE published=true AND difficulty='high_application' AND chapter=${chapter}
+        ORDER BY RANDOM()
+        LIMIT ${cfg.total}
+      `;
+    }
+
     if(rows.length<cfg.total) return json({error:"Kho đề chưa đủ câu cho cấu hình này/chapter này."},{status:409});
 
     const ids=rows.map((r:any)=>Number(r.id));
