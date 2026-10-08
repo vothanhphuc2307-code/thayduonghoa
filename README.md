@@ -107,3 +107,7 @@ copy(window.__TDH_MISSION_REPORT__())
 ```
 
 Collector không đọc cookie/localStorage values hay Authorization headers.
+
+
+## UI rebuild note
+This V3 uses a source-derived UI reference from a browser crawl of the authorized original site, including mission difficulty configuration, chapter labels, original brand image assets, and captured theme variables. It does not include the original Laravel/backend source.
