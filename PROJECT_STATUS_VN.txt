@@ -1,0 +1,18 @@
+DOL THPT — TRẠNG THÁI GÓI PHỤC DỰNG
+
+ĐÃ CÓ
+- Next.js frontend responsive và các trang kho đề, đăng nhập, đăng ký, làm bài, lịch sử, quản trị.
+- PostgreSQL schema, tạo admin từ biến môi trường, dữ liệu đề minh họa, API chấm bài phía server.
+- Console crawler chỉ thu thập metadata frontend công khai; không lấy cookies, localStorage, token, mật khẩu, raw HTML hay response API.
+- Đã kiểm tra cú pháp JS/JSX bằng parser và 5 test logic chấm điểm/che đáp án đều PASS.
+
+CHƯA XÁC NHẬN
+- Chưa chạy được npm install / npm run build trong môi trường tạo ZIP vì không kết nối được registry.npmjs.org (lỗi DNS EAI_AGAIN). Máy có mạng cần chạy npm install và npm run build trước khi đưa vào sử dụng thực tế.
+- Chưa chạy tích hợp với PostgreSQL thật; cần tạo database mới và chạy npm run db:init.
+- Đây là bản phục dựng độc lập, không phải repository gốc. Không có dữ liệu DOL THPT thật trong gói.
+
+CẦN CÓ ĐỂ DEPLOY
+- Repository GitHub của ông.
+- PostgreSQL mới, ví dụ Neon.
+- Các biến môi trường DATABASE_URL, SESSION_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD tại Vercel. Không gửi các giá trị này trong chat và không commit file .env.
+- Nếu muốn khôi phục dữ liệu thật: cần backup database/exports chính thức của hệ thống cũ hoặc quyền quản trị hợp lệ để xuất dữ liệu.
