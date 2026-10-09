@@ -1,0 +1,3 @@
+import AuthForm from '../../components/AuthForm.jsx';
+export const metadata = { title: 'Tạo tài khoản | DOL THPT' };
+export default function RegisterPage() { return <div className="auth-page container"><div className="auth-side"><div className="eyebrow light-eyebrow">BẮT ĐẦU HÀNH TRÌNH</div><h1>Ôn tập rõ ràng.<br/><em>Tiến bộ bền vững.</em></h1><p>Tạo tài khoản để lưu bài đã làm, xem kết quả và xây dựng thói quen học tập.</p><div className="auth-quote">Tài khoản mới mặc định là học viên. Quyền quản trị chỉ được cấp qua bước thiết lập an toàn.</div></div><div className="auth-card"><AuthForm mode="register" /></div></div>; }
